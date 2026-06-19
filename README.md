@@ -1,26 +1,57 @@
 # DevAnswers
 
-A full-stack **StackOverflow-style Q&A platform**. Users register, ask questions (with tags), post answers, and vote — with AI assists for improving question drafts and summarizing answers. This repository is a monorepo with two independently-run apps:
+A full-stack **StackOverflow-style Q&A platform**. Users register, ask questions (with tags), post answers, vote, bookmark questions for later, and edit their own posts — with AI assists for improving question drafts and summarizing answers.
+
+This is a monorepo with two independently-run apps:
 
 - **`devanswers-backend/`** — REST API: Express 5, MongoDB/Mongoose, JWT auth, Google Gemini AI.
 - **`devanswers-frontend/`** — SPA: React 19, Redux Toolkit, React Router 7, Vite, React-Bootstrap.
-
-> Built for the Week-11 graded project. Two features were added on top of the starter code — **Bookmark Questions** and **Edit your own Questions & Answers** — using a spec-driven, AI-assisted workflow (see [Development workflow](#development-workflow)).
 
 ---
 
 ## Features
 
-- **Authentication** — register, log in, JWT-protected actions.
-- **Questions** — list/feed, detail view (with view counts), create, tag, vote.
-- **Answers** — post answers, vote.
-- **Tags** — browse tags, filter questions by tag.
-- **AI** — "Improve with AI" on question drafts; "Summarize Answers" (Google Gemini).
-- **🔖 Bookmark Questions** *(added)* — save/unsave questions, per-user, with a "Saved Questions" section on your profile.
-- **✏️ Edit own Questions & Answers** *(added)* — authors edit their own posts on the question page, with an "edited" indicator.
-- **Theme** — light/dark mode toggle.
+**Accounts & auth**
+- Register and log in; JSON Web Token (JWT) sessions.
+- Authentication-gated actions (asking, answering, voting, bookmarking, editing).
 
-See [Implemented features](#implemented-features-this-project) for details.
+**Questions**
+- Browse the question feed with **search**, **sort** (newest / most votes / most answers), and **pagination**.
+- View a question with its answers and a **view counter**.
+- Ask a question with a title, description, and comma-separated **tags** (tags are created or reused automatically).
+- **Edit your own questions** (title, description, tags) inline on the question page; edited posts show an **"edited"** indicator.
+- **Upvote / downvote** questions.
+- **Bookmark** questions to save them for later.
+
+**Answers**
+- Post answers to a question.
+- **Edit your own answers** in place on the question page, with an **"edited"** indicator.
+- **Upvote / downvote** answers.
+
+**Tags**
+- Browse all tags with per-tag question counts.
+- Filter the feed by a selected tag.
+
+**Bookmarks**
+- Save and unsave questions; the bookmark icon reflects the current state instantly.
+- A **"Saved Questions"** section on your profile lists everything you've saved (with a friendly empty state), where you can open or unsave them.
+- Saved sets are per-user and persist across sessions.
+
+**AI assists (Google Gemini)**
+- **Improve with AI** — refine a question draft's title, description, and tags before posting.
+- **Summarize Answers** — generate a concise summary once a question has 3+ answers.
+
+**Profile**
+- Personal profile page with activity stats and the saved-questions list.
+
+**Experience**
+- Light/dark **theme** toggle (persisted).
+- Responsive, sidebar-based layout built with React-Bootstrap and react-icons.
+- Reusable voting and bookmark controls with built-in auth guards.
+
+**Security**
+- Helmet headers, CORS, and request rate limiting on the API.
+- Passwords hashed with bcrypt; protected routes verified via JWT middleware.
 
 ---
 
@@ -28,12 +59,12 @@ See [Implemented features](#implemented-features-this-project) for details.
 
 | | Backend | Frontend |
 |---|---|---|
-| Runtime/Framework | Node.js, Express 5 | React 19, Vite 6 |
-| Data/State | MongoDB, Mongoose 8 | Redux Toolkit, React-Redux |
+| Runtime / Framework | Node.js, Express 5 | React 19, Vite 6 |
+| Data / State | MongoDB, Mongoose 8 | Redux Toolkit, React-Redux |
 | Auth | JWT (`jsonwebtoken`), bcryptjs | token in `localStorage` |
 | AI | `@google/genai` (Gemini 2.5 Flash) | — |
 | HTTP | — | axios |
-| UI | helmet, CORS, rate-limit | React-Bootstrap, react-icons |
+| Hardening / UI | helmet, CORS, express-rate-limit | React-Bootstrap, react-icons |
 | Testing | Vitest, supertest, mongodb-memory-server | Vitest, Testing Library, MSW |
 
 ---
@@ -46,7 +77,7 @@ See [Implemented features](#implemented-features-this-project) for details.
 │   └── src/{routes,controllers,services,models,middleware,utils}
 ├── devanswers-frontend/       # React SPA (config → service → slice → component)
 │   └── src/{config,api,services,reducers,components,pages,layouts}
-├── specs/                     # spec + plan per feature (spec-driven workflow)
+├── specs/                     # spec + implementation plan per feature
 ├── .claude/                   # reusable Claude Code toolkit (slash commands)
 ├── CLAUDE.md                  # project memory: architecture & conventions
 └── README.md
@@ -100,14 +131,12 @@ The frontend expects the API at `http://localhost:3000/api` (see `src/api/axiosI
 Both apps use **Vitest**.
 
 ```bash
-# Backend — unit + integration (in-memory MongoDB, runs serially)
+# Backend — unit + integration (in-memory MongoDB)
 cd devanswers-backend && npm test
 
 # Frontend — unit + integration (Testing Library + MSW)
 cd devanswers-frontend && npm test
 ```
-
-Current status: **backend 245 passing**, **frontend 178 passing** (2 intentional, pre-existing skips for localStorage-init tests).
 
 ---
 
@@ -121,47 +150,25 @@ All routes are under `/api`. Responses use a consistent envelope: `{ success, me
 | GET | `/questions` | – | List questions |
 | GET | `/questions/:id` | – | Question + answers (increments views) |
 | POST | `/questions` | ✓ | Create question |
-| PUT | `/questions/:id` | ✓ (author) | **Edit question** |
-| POST | `/questions/:id/upvote` · `/downvote` | ✓ | Vote |
-| POST | `/questions/improve` | ✓ | AI improve draft |
-| POST | `/questions/:id/bookmark` | ✓ | **Save bookmark** |
-| DELETE | `/questions/:id/bookmark` | ✓ | **Remove bookmark** |
-| GET | `/questions/saved` | ✓ | **List my bookmarks** |
-| POST | `/questions/:questionId/answers` | ✓ | Post answer |
-| PUT | `/answers/:answerId` | ✓ (author) | **Edit answer** |
-| POST | `/answers/:answerId/upvote` · `/downvote` | ✓ | Vote |
-| POST | `/answers/summarize` | ✓ | AI summarize (≥3 answers) |
+| PUT | `/questions/:id` | ✓ (author) | Edit question |
+| POST | `/questions/:id/upvote` · `/downvote` | ✓ | Vote on a question |
+| POST | `/questions/improve` | ✓ | AI improve a draft |
+| POST | `/questions/:id/bookmark` | ✓ | Save a bookmark |
+| DELETE | `/questions/:id/bookmark` | ✓ | Remove a bookmark |
+| GET | `/questions/saved` | ✓ | List the current user's bookmarks |
+| POST | `/questions/:questionId/answers` | ✓ | Post an answer |
+| PUT | `/answers/:answerId` | ✓ (author) | Edit an answer |
+| POST | `/answers/:answerId/upvote` · `/downvote` | ✓ | Vote on an answer |
+| POST | `/answers/summarize` | ✓ | AI summarize (3+ answers) |
 | GET | `/tags` · `/tags/:tagId/questions` | – | Tags / questions by tag |
 
 ---
 
-## Implemented features (this project)
+## Architecture & conventions
 
-### 🔖 Bookmark Questions
-Logged-in users save questions and revisit them from their profile.
-- **Backend:** `User.bookmarks: [Question]`; idempotent `POST`/`DELETE /questions/:id/bookmark` and `GET /questions/saved`. Per-user (keyed on `req.user.id`); `GET /saved` is registered before `GET /:id` so it isn't parsed as an id.
-- **Frontend:** a shared `BookmarkButton` (filled vs. outline icon, auth-guarded) on the feed and the question page; a `bookmark` Redux slice where `savedIds` drives icon state; a profile **"Saved Questions"** section (reuses the question-list UI) with a friendly empty state; the saved set is hydrated on app load/login.
+The codebase follows strict, consistent patterns (captured in [`CLAUDE.md`](CLAUDE.md)):
 
-### ✏️ Edit own Questions & Answers
-Authors edit their own content on the question detail page (deletion is out of scope).
-- **Backend:** an `isEdited` flag on Question/Answer set **only** on a content edit (not on votes, which also touch `updatedAt`); empty-content validation (`400`); owner-only enforcement (`403`).
-- **Frontend:** pencil affordances shown **only to the author, only on the question page**; pre-filled inline edit forms with cancel; updates render in place (no reload); an **"(edited)"** indicator.
+- **Backend:** layered `routes → controllers → services → models`. Controllers stay thin and return the `{ success, message, data }` envelope; services hold all business logic and database access and raise errors via a shared `createAppError` helper; a central error handler formats responses. Protected routes use JWT middleware that sets `req.user`.
+- **Frontend:** unidirectional `config endpoint → service → Redux slice → component`. Endpoint paths live in one config module; services unwrap `res.data.data`; async thunks use `rejectWithValue`; UI reads from typed slices.
 
-Out of scope (per the brief): deleting posts, bookmarking answers, and folders/notes/sharing/export of saved questions.
-
----
-
-## Development workflow
-
-This project was built with **Claude Code** using a reusable, spec-driven pipeline:
-
-1. **`/spec`** → a precise, testable spec per feature → `specs/<feature>/spec.md`
-2. **`/plan-feature`** → an ordered, bottom-up implementation plan → `specs/<feature>/plan.md`
-3. **`/implement`** → build to the plan, tests-first
-4. **`/review`** → review the diff
-5. Test & verify
-
-The slash commands live in [`.claude/commands/`](.claude/commands), and [`CLAUDE.md`](CLAUDE.md) is the project memory capturing the architecture and conventions every change follows:
-
-- **Backend:** `routes → controllers → services → models`; `{ success, message, data }` envelope; errors via `createAppError`.
-- **Frontend:** `config endpoint → service → Redux slice → component`; services unwrap `res.data.data`; thunks use `rejectWithValue`.
+Feature work in this repo is **spec-driven**: each feature has a spec and an implementation plan under [`specs/`](specs), and the reusable Claude Code slash commands that drive that pipeline live in [`.claude/commands/`](.claude/commands).
