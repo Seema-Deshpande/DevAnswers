@@ -1,0 +1,116 @@
+.alist-card {
+  border-radius: 12px;
+  box-shadow: var(--card-shadow);
+}
+
+.alist-title {
+  font-weight: 700;
+  color: var(--text-color);
+}
+
+.alist-vote-btn {
+  border-radius: 8px;
+  font-size: 1rem;
+}
+
+.alist-vote-btn-up {
+  padding: 0.3rem 0.5rem;
+  margin-bottom: 0.4rem;
+}
+
+.alist-vote-btn-down {
+  padding: 0.3rem 0.5rem;
+  margin-top: 0.4rem;
+}
+
+.alist-vote-count {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-color);
+  margin: 0.25rem 0;
+}
+
+.alist-content {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--text-color);
+}
+
+.alist-meta {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.alist-author {
+  color: var(--primary-color);
+}
+
+.alist-answer-card {
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+}
+
+.alist-answer-card:nth-child(even) {
+  background-color: var(--card-bg);
+}
+
+.alist-answer-card:nth-child(odd) {
+  background-color: var(--bg-secondary);
+}
+
+.alist-icon-up {
+  color: #5eba7d;
+}
+
+.alist-icon-down {
+  color: #dc3545;
+}
+
+.alist-icon-sm {
+  font-size: 0.8rem;
+}
+
+.alist-summarize-btn {
+  border-radius: 6px;
+  font-size: 0.8rem;
+  white-space: nowrap;
+}
+
+.alist-summary-banner {
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background-color: var(--bg-secondary);
+  padding: 0.75rem 1rem;
+}
+
+.alist-summary-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}
+
+.alist-summary-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.alist-summary-dismiss {
+  font-size: 0.8rem;
+  padding: 0;
+  color: var(--text-muted);
+  text-decoration: none;
+}
+
+.alist-summary-dismiss:hover {
+  color: var(--text-color);
+}
+
+.alist-summary-text {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: var(--text-color);
+}
