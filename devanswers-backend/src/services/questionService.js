@@ -106,6 +106,10 @@ export const updateQuestionService = async (
     throw createAppError("Not authorized to update this question", 403);
   }
 
+  if (!title?.trim() || !description?.trim()) {
+    throw createAppError("Title and description are required", 400);
+  }
+
   const tagArray = tags
     .trim()
     .split(",")
@@ -125,9 +129,11 @@ export const updateQuestionService = async (
 
   const updatedQuestion = await Question.findByIdAndUpdate(
     id,
-    { title, description, tags: tagIds },
+    { title, description, tags: tagIds, isEdited: true },
     { new: true },
-  );
+  )
+    .populate({ path: "author", select: "name" })
+    .populate("tags");
 
   if (!updatedQuestion) {
     throw createAppError("Question not found", 404);

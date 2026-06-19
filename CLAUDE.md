@@ -83,3 +83,19 @@ Custom slash commands in `.claude/commands/` drive feature work in order:
 5. **`/review`** — review pending changes for correctness and convention adherence
 
 Always follow the layering and the conventions above. Match the style of existing files rather than introducing new patterns.
+
+---
+
+## Delivered features (this project)
+
+Two features were added on top of the starter code; both follow the conventions above.
+
+### Bookmark Questions (per-user save)
+- **Backend:** `User.bookmarks: [Question]`; `services/bookmarkService.js` + `controllers/bookmarkController.js`; routes `POST`/`DELETE /api/questions/:id/bookmark` and `GET /api/questions/saved` (all `authenticate`). **`GET /saved` is declared before `GET /:id`** in `routes/questions.js` so "saved" isn't parsed as an id. Idempotent (`$addToSet`/`$pull`); per-user via `req.user.id`.
+- **Frontend:** `reducers/bookmarkSlice.js` (`savedIds` is the source of truth for icon state; `savedQuestions` for the profile list); shared `components/Shared/BookmarkButton.jsx` (filled `FaBookmark` / outline `FaRegBookmark`, auth-guarded like `VoteButtons`) used in `QuestionCard` and `QuestionContent`; profile "Saved Questions" section reuses `QuestionList`; `App.jsx` hydrates the saved set on load/login and clears it on logout.
+
+### Edit own Questions & Answers (no delete)
+- **Backend:** `isEdited: Boolean` on `Question` and `Answer`, set only on a content edit (**not** derived from `updatedAt`, which voting bumps). `updateQuestionService`/`updateAnswerService` validate non-empty content (`400`) and the owner check returns `403`. The question update returns a **populated** document so the frontend can update in place.
+- **Frontend:** `editQuestion`/`editAnswer` thunks in `questionSlice`; pencil affordances (`FaPencilAlt`) shown only to the author, only on the question detail page (`QuestionContent` / `AnswerList`) — never in the feed. `(edited)` indicator renders from `isEdited`.
+
+A pre-existing flaky test (tags sort on sub-millisecond `createdAt` ties) was fixed with a `_id` tiebreaker in `getQuestionsByTagService`.

@@ -6,8 +6,13 @@ import {
   upvoteQuestion,
   downvoteQuestion,
   createAnswerForQuestion,
+  updateQuestion,
 } from "../services/questionService.js";
-import { upvoteAnswer, downvoteAnswer } from "../services/answerService.js";
+import {
+  upvoteAnswer,
+  downvoteAnswer,
+  updateAnswer,
+} from "../services/answerService.js";
 
 const initialState = {
   questions: [],
@@ -122,6 +127,42 @@ export const postAnswer = createAsyncThunk(
   },
 );
 
+// Feature 2 — edit a question (title/description/tags). The backend returns the
+// updated question with populated author/tags, so we merge it into currentQuestion
+// in place (preserving the answers array) — no re-fetch, no loading spinner.
+export const editQuestion = createAsyncThunk(
+  "question/editQuestion",
+  async ({ id, title, description, tags }, { getState, rejectWithValue }) => {
+    try {
+      const token = getState().user.userInfo?.token;
+      return await updateQuestion(id, { title, description, tags }, token);
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data?.message ||
+          error.message ||
+          "Failed to update question",
+      );
+    }
+  },
+);
+
+// Feature 2 — edit an answer's text (returns the populated answer).
+export const editAnswer = createAsyncThunk(
+  "question/editAnswer",
+  async ({ answerId, answerText }, { getState, rejectWithValue }) => {
+    try {
+      const token = getState().user.userInfo?.token;
+      return await updateAnswer(answerId, answerText, token);
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data?.message ||
+          error.message ||
+          "Failed to update answer",
+      );
+    }
+  },
+);
+
 const questionSlice = createSlice({
   name: "question",
   initialState,
@@ -217,6 +258,37 @@ const questionSlice = createSlice({
       })
       .addCase(postAnswer.rejected, (state, action) => {
         state.loading = false;
+        state.error = action.payload || action.error.message;
+      })
+      // editQuestion — merge updated fields in place, keeping the answers array
+      .addCase(editQuestion.fulfilled, (state, action) => {
+        if (state.currentQuestion) {
+          state.currentQuestion = {
+            ...state.currentQuestion,
+            title: action.payload.title,
+            description: action.payload.description,
+            tags: action.payload.tags,
+            isEdited: action.payload.isEdited,
+          };
+        }
+      })
+      .addCase(editQuestion.rejected, (state, action) => {
+        state.error = action.payload || action.error.message;
+      })
+      // editAnswer — patch the answer in place within currentQuestion.answers
+      .addCase(editAnswer.fulfilled, (state, action) => {
+        const updated = action.payload;
+        if (state.currentQuestion?.answers) {
+          const idx = state.currentQuestion.answers.findIndex(
+            (a) => a._id === updated._id,
+          );
+          if (idx !== -1) {
+            state.currentQuestion.answers[idx].answerText = updated.answerText;
+            state.currentQuestion.answers[idx].isEdited = updated.isEdited;
+          }
+        }
+      })
+      .addCase(editAnswer.rejected, (state, action) => {
         state.error = action.payload || action.error.message;
       });
   },

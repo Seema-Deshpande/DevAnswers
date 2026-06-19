@@ -21,6 +21,10 @@ const userSchema = new mongoose.Schema({
     isAdmin: {
         type: Boolean,
         default: false,
+    },
+    bookmarks: {
+        type: [{ type: mongoose.Schema.Types.ObjectId, ref: "Question" }],
+        default: [],
     }
 }, { timestamps: true });
 

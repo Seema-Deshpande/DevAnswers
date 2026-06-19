@@ -1,15 +1,21 @@
 import { useState, useEffect } from 'react';
 import { Container, Row, Col, Card, Form, Button, Alert, Spinner } from 'react-bootstrap';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { FaUser, FaEnvelope, FaSave, FaEdit } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { USER_API } from '../../config/config.js';
+import { fetchSavedQuestions } from '../../reducers/bookmarkSlice.js';
+import QuestionList from '../../components/Question/QuestionList.jsx';
 import './Profile.css';
+
+const EMPTY_SAVED = [];
 
 const Profile = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const { userInfo } = useSelector((state) => state.user);
+  const savedQuestions = useSelector((state) => state.bookmark?.savedQuestions ?? EMPTY_SAVED);
   const isAuthenticated = !!userInfo;
   
   const [isEditing, setIsEditing] = useState(false);
@@ -37,8 +43,9 @@ const Profile = () => {
       navigate('/login');
     } else if (userInfo?.userId) {
       fetchUserStats();
+      dispatch(fetchSavedQuestions());
     }
-  }, [isAuthenticated, navigate, userInfo]);
+  }, [isAuthenticated, navigate, userInfo, dispatch]);
 
   const fetchUserStats = async () => {
     try {
@@ -74,7 +81,7 @@ const Profile = () => {
         setIsEditing(false);
         setLoading(false);
       }, 1000);
-    } catch (err) {
+    } catch {
       setError('Failed to update profile. Please try again.');
       setLoading(false);
     }
@@ -303,6 +310,18 @@ const Profile = () => {
                     </small>
                   </Alert>
                 </div>
+              )}
+            </Card.Body>
+          </Card>
+
+          {/* Saved Questions */}
+          <Card className="mt-4 profile-body-card">
+            <Card.Body className="p-4">
+              <h5 className="mb-3 profile-stats-title">Saved Questions</h5>
+              {savedQuestions && savedQuestions.length > 0 ? (
+                <QuestionList questions={savedQuestions} />
+              ) : (
+                <p className="text-muted mb-0">No saved questions yet.</p>
               )}
             </Card.Body>
           </Card>

@@ -18,3 +18,13 @@ export const downvoteAnswer = async (answerId, token) => {
   );
   return res.data.data;
 };
+
+// Feature 2 — edit an answer's text
+export const updateAnswer = async (answerId, answerText, token) => {
+  const res = await axiosInstance.put(
+    ANSWER_API.UPDATE(answerId),
+    { answerText },
+    { headers: { Authorization: `Bearer ${token}` } },
+  );
+  return res.data.data;
+};

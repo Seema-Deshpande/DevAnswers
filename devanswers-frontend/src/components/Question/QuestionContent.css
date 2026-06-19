@@ -69,3 +69,29 @@
 .qcontent-icon-sm {
   font-size: 0.85rem;
 }
+
+/* Feature 2 — edit affordance + edited indicator */
+.qcontent-bookmark-btn,
+.qcontent-edit-btn {
+  border: none;
+  background: none;
+  text-decoration: none;
+  font-size: 1.05rem;
+  line-height: 1;
+}
+
+.qcontent-edit-btn {
+  color: var(--text-muted);
+  transition: color 0.15s ease, transform 0.15s ease;
+}
+
+.qcontent-edit-btn:hover,
+.qcontent-edit-btn:focus {
+  color: var(--primary-color);
+  transform: scale(1.1);
+}
+
+.qcontent-edited-indicator {
+  font-style: italic;
+  font-size: 0.85rem;
+}

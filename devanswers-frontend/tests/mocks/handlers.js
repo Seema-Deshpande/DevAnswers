@@ -177,4 +177,64 @@ export const handlers = [
       },
     });
   }),
+
+  // ── Bookmark endpoints (Feature 1) ────────────────────────────────────────
+  // Default: no saved questions. Individual tests override this handler.
+  http.get(`${BASE_URL}/questions/saved`, () => {
+    return HttpResponse.json({ success: true, data: [] });
+  }),
+
+  http.post(`${BASE_URL}/questions/:id/bookmark`, ({ params }) => {
+    return HttpResponse.json({
+      success: true,
+      data: { questionId: params.id, bookmarked: true },
+    });
+  }),
+
+  http.delete(`${BASE_URL}/questions/:id/bookmark`, ({ params }) => {
+    return HttpResponse.json({
+      success: true,
+      data: { questionId: params.id, bookmarked: false },
+    });
+  }),
+
+  // ── Edit endpoints (Feature 2) ────────────────────────────────────────────
+  http.put(`${BASE_URL}/questions/:id`, async ({ request, params }) => {
+    const body = await request.json();
+    const base = mockQuestions.find((q) => q._id === params.id) || {};
+    // Backend returns populated tags (objects) + author; simulate that here.
+    const tags =
+      typeof body.tags === "string"
+        ? body.tags
+            .split(",")
+            .map((name, i) => ({ _id: `tag-edit-${i}`, name: name.trim() }))
+        : body.tags || base.tags || [];
+    return HttpResponse.json({
+      success: true,
+      data: {
+        ...base,
+        ...body,
+        _id: params.id,
+        tags,
+        author: base.author || { _id: "user-1", name: mockUsers.user1.name },
+        isEdited: true,
+      },
+    });
+  }),
+
+  http.put(`${BASE_URL}/answers/:id`, async ({ request, params }) => {
+    const body = await request.json();
+    return HttpResponse.json({
+      success: true,
+      data: {
+        _id: params.id,
+        answerText: body.answerText,
+        author: { _id: "user-1", name: mockUsers.user1.name },
+        voteCount: 0,
+        upvotes: [],
+        downvotes: [],
+        isEdited: true,
+      },
+    });
+  }),
 ];

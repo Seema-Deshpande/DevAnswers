@@ -1,0 +1,21 @@
+/* Shared bookmark toggle — smooth, theme-aware styling */
+.bookmark-btn {
+  border: none;
+  background: none;
+  text-decoration: none;
+  color: var(--text-muted);
+  font-size: 1.1rem;
+  line-height: 1;
+  transition: color 0.15s ease, transform 0.15s ease;
+}
+
+.bookmark-btn:hover,
+.bookmark-btn:focus {
+  color: var(--primary-color);
+  transform: scale(1.12);
+}
+
+/* Saved state — filled icon in the brand accent colour so it clearly reads as saved */
+.bookmark-btn--saved {
+  color: var(--primary-color);
+}

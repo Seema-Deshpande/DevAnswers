@@ -1,3 +1,5 @@
+import { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { BrowserRouter as Router, Routes, Route, Outlet } from 'react-router-dom';
 
 import Home from './pages/Question/Home.jsx';
@@ -9,8 +11,21 @@ import Profile from './pages/Profile/Profile.jsx';
 import Tags from './pages/Tags/Tags.jsx';
 import BaseLayout from './layouts/BaseLayout.jsx';
 import SideBarLayout from './layouts/SideBarLayout.jsx';
+import { fetchSavedQuestions, clearBookmarks } from './reducers/bookmarkSlice.js';
 
 function App() {
+  const dispatch = useDispatch();
+  const { userInfo } = useSelector((state) => state.user);
+
+  // Hydrate the user's saved-question set on app load / after login so bookmark
+  // icons render in the correct state immediately; clear it on logout.
+  useEffect(() => {
+    if (userInfo) {
+      dispatch(fetchSavedQuestions());
+    } else {
+      dispatch(clearBookmarks());
+    }
+  }, [userInfo, dispatch]);
 
   return (
     <Router>

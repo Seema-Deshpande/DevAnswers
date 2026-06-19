@@ -346,9 +346,13 @@ describe("questionService", () => {
       }));
 
       Question.findById = vi.fn().mockResolvedValue(mockExistingQuestion);
-      Question.findByIdAndUpdate = vi
-        .fn()
-        .mockResolvedValue(mockUpdatedQuestion);
+      // updateQuestionService now returns a populated document, so the
+      // findByIdAndUpdate result must be chainable: .populate().populate()
+      Question.findByIdAndUpdate = vi.fn().mockReturnValue({
+        populate: vi.fn().mockReturnValue({
+          populate: vi.fn().mockResolvedValue(mockUpdatedQuestion),
+        }),
+      });
 
       // Act
       const result = await updateQuestionService(

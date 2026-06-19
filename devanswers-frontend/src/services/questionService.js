@@ -55,3 +55,35 @@ export const createAnswerForQuestion = async (
   );
   return res.data.data;
 };
+
+// Feature 2 — edit a question (title/description/tags). tags is a comma-separated string.
+export const updateQuestion = async (id, questionData, token) => {
+  const res = await axiosInstance.put(QUESTION_API.UPDATE(id), questionData, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return res.data.data;
+};
+
+// Feature 1 — bookmarks
+export const addBookmark = async (id, token) => {
+  const res = await axiosInstance.post(
+    QUESTION_API.BOOKMARK(id),
+    {},
+    { headers: { Authorization: `Bearer ${token}` } },
+  );
+  return res.data.data;
+};
+
+export const removeBookmark = async (id, token) => {
+  const res = await axiosInstance.delete(QUESTION_API.BOOKMARK(id), {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return res.data.data;
+};
+
+export const getSavedQuestions = async (token) => {
+  const res = await axiosInstance.get(QUESTION_API.SAVED, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return res.data.data || [];
+};

@@ -21,6 +21,10 @@ export const QUESTION_API = {
   DOWNVOTE: (id) => `/questions/${id}/downvote`,
   CREATE_ANSWER_FOR_QUESTION: (questionId) =>
     `/questions/${questionId}/answers`,
+
+  // Bookmarks
+  SAVED: "/questions/saved",
+  BOOKMARK: (id) => `/questions/${id}/bookmark`,
 };
 
 // Answer API Endpoints

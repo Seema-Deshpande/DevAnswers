@@ -28,6 +28,10 @@ const answerSchema = new mongoose.Schema({
     voteCount: {
         type: Number,
         default: 0,
+    },
+    isEdited: {
+        type: Boolean,
+        default: false,
     }
 }, { timestamps: true });
 
