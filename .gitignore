@@ -3,11 +3,7 @@ node_modules/
 **/node_modules/
 
 # Secrets / env (NEVER commit) — keep .env.example only
-.env
-.env.*
 !.env.example
-**/.env
-**/.env.*
 !**/.env.example
 
 # Build output
@@ -30,7 +26,7 @@ yarn-error.log*
 .DS_Store
 *.swp
 .idea/
-.vscode/
 
 # Claude Code local-only settings (keep shared settings.json + commands tracked)
 .claude/settings.local.json
+config.bat
